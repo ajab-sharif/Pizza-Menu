@@ -1,21 +1,22 @@
 /* eslint-disable no-unused-vars */
-import Header from "./Header";
-import CartOverview from "./../features/cart/CartOverview";
-import { Outlet, useNavigation } from "react-router-dom";
-import Loader from "./Loader";
+import Header from './Header';
+import CartOverview from './../features/cart/CartOverview';
+import { Outlet, useNavigation } from 'react-router-dom';
+import Loader from './Loader';
 
 function AppLayout() {
-  console.log("fast");
   const navigation = useNavigation();
-  const isLoading = navigation.state === "loading";
+  const isLoading = navigation.state === 'loading';
+  console.log(isLoading);
   return (
-    <div className="layout">
+    <div className="grid h-screen grid-rows-[auto_1fr_auto]">
       {isLoading && <Loader />}
       <Header />
-      <main>
-        <h1>content</h1>
-        <Outlet />
-      </main>
+      <div className="overflow-scroll">
+        <main className="mx-auto max-w-3xl ">
+          <Outlet />
+        </main>
+      </div>
       <CartOverview />
     </div>
   );
