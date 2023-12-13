@@ -2,14 +2,19 @@
 /* eslint-disable no-unused-vars */
 import { Form, redirect, useActionData, useNavigation } from 'react-router-dom';
 import { createOrder } from '../../services/apiRestaurant';
+import EmptyCart from './../cart/EmptyCart';
 import Button from '../../ui/Button';
 import { useSelector } from 'react-redux';
+import { clearCart, getCart, getTotalCartPrice } from '../cart/cartSlice';
+import store from './../../store';
+import { formatCurrency } from '../../utils/helpers';
+import { useState } from 'react';
+
 // https://uibakery.io/regex-library/phone-number
 const isValidPhone = (str) =>
   /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(
     str,
   );
-
 const fakeCart = [
   {
     pizzaId: 12,
@@ -35,14 +40,16 @@ const fakeCart = [
 ];
 
 function CreateOrder() {
+  const [withPriority, setWithPriority] = useState(false);
   const navigation = useNavigation();
   const isSubmiting = navigation.state === 'submitting';
   const fromError = useActionData();
   const username = useSelector((state) => state.user.username);
-
-  // const [withPriority, setWithPriority] = useState(false);
-  const cart = fakeCart;
-
+  const totalCartPrice = useSelector(getTotalCartPrice);
+  const priorityPrice = withPriority ? totalCartPrice * 0.2 : 0;
+  const totalPrice = totalCartPrice + priorityPrice;
+  const cart = useSelector(getCart);
+  if (!cart.length) return <EmptyCart />;
   return (
     <div className="px-4 py-6">
       <h2 className="mb-8 text-xl font-semibold">Ready to order? Let's go!</h2>
@@ -104,9 +111,8 @@ function CreateOrder() {
             type="checkbox"
             name="priority"
             id="priority"
-
-            // value={withPriority}
-            // onChange={(e) => setWithPriority(e.target.checked)}
+            value={withPriority}
+            onChange={(e) => setWithPriority(e.target.checked)}
           />
           <label htmlFor="priority" className="cursor-pointer font-medium">
             Want to yo give your order priority?
@@ -116,7 +122,9 @@ function CreateOrder() {
         <div>
           <input type="hidden" name="cart" value={JSON.stringify(cart)} />
           <Button type="primary" disabled={isSubmiting}>
-            {isSubmiting ? 'Placing order...' : 'Order now'}
+            {isSubmiting
+              ? 'Placing order...'
+              : `Order now ${formatCurrency(totalPrice)}`}
           </Button>
         </div>
       </Form>
@@ -129,7 +137,7 @@ export async function action({ request }) {
   const order = {
     ...data,
     cart: JSON.parse(data.cart),
-    priority: data.priority === 'on',
+    priority: data.priority === 'true',
   };
 
   const error = {};
@@ -140,6 +148,8 @@ export async function action({ request }) {
 
   //if everthing is ok create new order and redirect page
   const newOrder = await createOrder(order);
+  //don't use overtime its not optimization
+  store.dispatch(clearCart());
   // navigation not use becase naigate call only component
   // this redicrect page to new order page
   return redirect(`/order/${newOrder.id}`);

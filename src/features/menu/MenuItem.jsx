@@ -1,10 +1,30 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
+import { useDispatch, useSelector } from 'react-redux';
 import { formatCurrency } from '../../utils/helpers';
 import Button from './../../ui/Button';
+import { addItem, getCurrentQuantityById } from '../cart/cartSlice';
+import DeleteItem from '../cart/DeleteItem';
+import UpdateItemQuantity from '../cart/UpdateItemQuantity';
 
 /* eslint-disable react/prop-types */
 function MenuItem({ pizza }) {
-  const { name, unitPrice, ingredients, soldOut, imageUrl } = pizza;
+  const dispatch = useDispatch();
+  const { name, unitPrice, ingredients, soldOut, imageUrl, id } = pizza;
 
+  const currentQuantity = useSelector(getCurrentQuantityById(id));
+  const isInCart = currentQuantity > 0;
+
+  function handleAddToCart() {
+    const newItem = {
+      pizzaId: id,
+      name,
+      quantity: 1,
+      unitPrice,
+      totalPrice: unitPrice * 1,
+    };
+    dispatch(addItem(newItem));
+  }
   return (
     <li className="flex gap-4 py-2">
       <img
@@ -25,7 +45,17 @@ function MenuItem({ pizza }) {
               Sold out
             </p>
           )}
-          <Button type="small">add to cart</Button>
+          {isInCart && (
+            <div className="flex gap-2 md:gap-3">
+              <UpdateItemQuantity pizzaId={id} />
+              <DeleteItem pizzaId={id} />
+            </div>
+          )}
+          {!soldOut && !isInCart && (
+            <Button onClick={handleAddToCart} type="small">
+              add to cart
+            </Button>
+          )}
         </div>
       </div>
     </li>
