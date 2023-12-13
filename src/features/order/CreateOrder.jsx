@@ -3,6 +3,7 @@
 import { Form, redirect, useActionData, useNavigation } from 'react-router-dom';
 import { createOrder } from '../../services/apiRestaurant';
 import Button from '../../ui/Button';
+import { useSelector } from 'react-redux';
 // https://uibakery.io/regex-library/phone-number
 const isValidPhone = (str) =>
   /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(
@@ -37,6 +38,7 @@ function CreateOrder() {
   const navigation = useNavigation();
   const isSubmiting = navigation.state === 'submitting';
   const fromError = useActionData();
+  const username = useSelector((state) => state.user.username);
 
   // const [withPriority, setWithPriority] = useState(false);
   const cart = fakeCart;
@@ -48,14 +50,31 @@ function CreateOrder() {
       {/* <Form method="POST" action="/order/new"> */}
       <Form method="POST">
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="sm:basis-40">First Name</label>
-          <input type="text" className="input grow" name="customer" required />
+          <label htmlFor="name" className="cursor-pointer sm:basis-40">
+            First Name
+          </label>
+          <input
+            type="text"
+            className="input grow"
+            name="customer"
+            defaultValue={username}
+            id="name"
+            required
+          />
         </div>
 
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="sm:basis-40">Phone number</label>
+          <label htmlFor="phone" className="cursor-pointer sm:basis-40">
+            Phone number
+          </label>
           <div className="grow">
-            <input type="tel" name="phone" required className="input w-full" />
+            <input
+              type="tel"
+              name="phone"
+              required
+              className="input w-full"
+              id="phone"
+            />
             {fromError?.phone && (
               <p className="mt-2 rounded-md bg-red-100 p-2 text-sm text-red-700">
                 {fromError.phone}
@@ -65,12 +84,15 @@ function CreateOrder() {
         </div>
 
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="sm:basis-40">Address</label>
+          <label className="cursor-pointer sm:basis-40" htmlFor="address">
+            Address
+          </label>
           <div className="grow">
             <input
               className="input w-full"
               type="text"
               name="address"
+              id="address"
               required
             />
           </div>
@@ -78,7 +100,7 @@ function CreateOrder() {
 
         <div className="mb-12 flex items-center gap-5">
           <input
-            className="h-6 w-6 accent-yellow-400 focus:ring focus:ring-yellow-400 focus:ring-offset-2 md:px-6 md:py-3"
+            className="h-6 w-6 cursor-pointer accent-yellow-400 focus:ring focus:ring-yellow-400 focus:ring-offset-2 md:px-6 md:py-3"
             type="checkbox"
             name="priority"
             id="priority"
@@ -86,7 +108,7 @@ function CreateOrder() {
             // value={withPriority}
             // onChange={(e) => setWithPriority(e.target.checked)}
           />
-          <label htmlFor="priority" className="font-medium">
+          <label htmlFor="priority" className="cursor-pointer font-medium">
             Want to yo give your order priority?
           </label>
         </div>
